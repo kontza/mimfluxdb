@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 
@@ -22,6 +23,22 @@ func rootRunner(cmd *cobra.Command, args []string) {
 				"error":  "Internal Server Error",
 				"detail": err.Error(),
 			})
+			return
+		}
+		validToken := false
+		for _, token := range c.Request.Header["Authorization"] {
+			for _, expected := range appConfig.Tokens {
+				if fmt.Sprintf("Token %s", expected) == token {
+					validToken = true
+					break
+				}
+			}
+			if validToken {
+				break
+			}
+		}
+		if !validToken {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			return
 		}
 		log.Info().Interface("header", c.Request.Header).Str("body", string(body)).Msg("Received")

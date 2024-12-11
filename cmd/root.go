@@ -22,6 +22,7 @@ type AppConfig struct {
 	cfgFile             string
 	LogWithoutTimestamp bool `mapstructure:"log-without-timestamp"`
 	StructuredLogging   bool `mapstructure:"structured-logging"`
+	Tokens              []string
 }
 
 var appConfig AppConfig
