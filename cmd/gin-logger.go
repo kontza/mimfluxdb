@@ -35,7 +35,7 @@ func ErrorLoggerT(typ gin.ErrorType) gin.HandlerFunc {
 	}
 }
 
-func Logger(serName string) gin.HandlerFunc {
+func zeroLogger(serName string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
 		// before request
