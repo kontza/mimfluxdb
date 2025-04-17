@@ -1,14 +1,21 @@
 package cmd
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
+
+	"github.com/Xiol/zerochi"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 func rootRunner(cmd *cobra.Command, args []string) {
-	r := gin.New()
-	r.Use(zeroLogger("gin"), gin.Recovery())
-	r.SetTrustedProxies(nil)
-	r.POST("/api/v2/write", writeHandler)
-	r.Run(":8086")
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID,
+		middleware.RealIP,
+		zerochi.Logger(&log.Logger),
+		middleware.Recoverer)
+	r.Post("/api/v2/write", writeHandler)
+	http.ListenAndServe(":8086", r)
 }

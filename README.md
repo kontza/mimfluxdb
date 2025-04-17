@@ -19,7 +19,7 @@ Looks like an InfluxDB instance, but writes to a PostgreSQL.
 1. Run the app:
 
     ```sh
-    ./mimfluxdb
+    /tmp/bin/mimfluxdb
     ```
 
 1. Make a query:

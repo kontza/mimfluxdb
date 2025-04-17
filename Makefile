@@ -1,6 +1,6 @@
 # Change these variables as necessary.
 main_package_path = .
-binary_name = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+binary_name = $(awk '/^module/{print $2}' go.mod)
 
 # ==================================================================================== #
 # HELPERS
