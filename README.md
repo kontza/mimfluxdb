@@ -1,6 +1,6 @@
 # Introduction
 
-Looks like an InfluxDB instance, but writes to a PostgreSQL.
+Looks like an InfluxDB instance, but writes to a PostgreSQL instance.
 
 ## How to Run
 
