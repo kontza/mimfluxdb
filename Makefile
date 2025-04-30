@@ -1,6 +1,7 @@
 # Change these variables as necessary.
 main_package_path = .
-binary_name = $(awk '/^module/{print $2}' go.mod)
+binary_name := $(shell rg '^module +(?P<app_name>\w+)' -or '$$app_name' go.mod)
+app_version := $(shell git describe --tags --abbrev=0)
 
 # ==================================================================================== #
 # HELPERS
@@ -61,7 +62,7 @@ tidy:
 .PHONY: build
 build:
 	# Include additional build steps, like TypeScript, SCSS or Tailwind compilation here...
-	go build -ldflags '-w -s' -o=/tmp/bin/${binary_name} ${main_package_path}
+	go build -ldflags '-w -s -X main.appVersion=${app_version} -X main.appName=${binary_name}' -o=/tmp/bin/${binary_name} ${main_package_path}
 
 ## run: run the  application
 .PHONY: run
@@ -90,7 +91,7 @@ push: confirm audit no-dirty
 ## production/deploy: deploy the application to production
 .PHONY: production/deploy
 production/deploy: confirm audit no-dirty
-	GOOS=linux GOARCH=amd64 go build -ldflags='-w -s' -o=/tmp/bin/linux_amd64/${binary_name} ${main_package_path}
+	GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -X main.appVersion=${app_version}' -o=/tmp/bin/linux_amd64/${binary_name} ${main_package_path}
 	# Include additional deployment steps here...
 	scp /tmp/bin/linux_amd64/${binary_name} esmgmt01:
 

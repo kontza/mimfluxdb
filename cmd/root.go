@@ -29,9 +29,13 @@ var appConfig AppConfig
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "mimfluxdb",
 	Short: "Provides a write interface looking like InfluxDB, but stores data into a PostgreSQL instance",
 	Run:   rootRunner,
+}
+
+func Bootstrap(name string, version string) {
+	rootCmd.Version = version
+	rootCmd.Use = name
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

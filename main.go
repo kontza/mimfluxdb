@@ -5,6 +5,12 @@ package main
 
 import "mimfluxdb/cmd"
 
+var (
+	appVersion = "dev"
+	appName    string
+)
+
 func main() {
+	cmd.Bootstrap(appName, appVersion)
 	cmd.Execute()
 }
