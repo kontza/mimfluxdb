@@ -25,8 +25,16 @@ Looks like an InfluxDB instance, but writes to a PostgreSQL instance.
 1. Make a query:
 
     ```sh
-    echo 'temperature,location=point-of-measurement temperature=64 1744806632000000000'|\
-        http POST localhost:8086/api/v2/write 'Authorization: Token some-very-secret-token-here'
+    printf "%s,%s %s %s %s %s %s\n" \
+        temperatures \
+        "location=point-of-measurement" \
+        "temperature=6.4" \
+        "rssi=-42" \
+        "count=16384" \
+        "device=28ff248274160427" \
+        17448066320000000000 |\
+        http POST localhost:8086/api/v2/write \
+        'Authorization: Token some-very-secret-token-here'
     ```
 
 1. Check the app's log for correct parsing of the parts.
