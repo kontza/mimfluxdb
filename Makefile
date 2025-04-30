@@ -90,8 +90,6 @@ push: confirm audit no-dirty
 
 ## production/deploy: deploy the application to production
 .PHONY: production/deploy
-production/deploy: confirm audit no-dirty
-	GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -X main.appVersion=${app_version}' -o=/tmp/bin/linux_amd64/${binary_name} ${main_package_path}
+production/deploy: confirm audit no-dirty build
 	# Include additional deployment steps here...
-	scp /tmp/bin/linux_amd64/${binary_name} esmgmt01:
-
+	@echo Done
