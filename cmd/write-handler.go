@@ -16,13 +16,8 @@ type ParseResponse struct {
 	StatusText     string `json:"status"` // user-level status message
 }
 
-type MeasurementData struct {
-	Location    string
-	Temperature float64
-	Rssi        int
-	Count       int
-	Device      string
-}
+const TEMPERATURE_FIELD = "temperature"
+const LOCATION_FIELD = "location"
 
 func (pr *ParseResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
@@ -50,44 +45,73 @@ func writeHandler(w http.ResponseWriter, r *http.Request) {
 		render.Render(w, r, errUnauthorized())
 	}
 	log.Info().Interface("header", r.Header).Str("body", string(body)).Msg("Received")
-	render.Render(w, r, parseBody(body))
+	data := parseBody(body)
+	render.Render(w, r, storeData(data))
 }
 
-func parseBody(body []byte) *ParseResponse {
+func parseBody(body []byte) map[string]any {
 	payload := string(body)
 	firstComma := strings.Index(payload, ",")
 	lastSpace := strings.LastIndex(payload, " ")
 	data := payload[firstComma+1 : lastSpace]
 	bySpaces := strings.Split(data, " ")
-	measurementData := MeasurementData{}
+	measurementData := make(map[string]any)
+	measurementData["DATABASE"] = payload[:firstComma]
+	integerKeys := []string{"rssi", "count"}
+	floatKeys := []string{TEMPERATURE_FIELD}
 	for _, part := range bySpaces {
 		byCommas := strings.Split(part, ",")
-		var err error
 		for _, subPart := range byCommas {
 			equals := strings.Index(subPart, "=")
-			switch subPart[:equals] {
-			case "location":
-				measurementData.Location = subPart[equals+1:]
-			case "count":
-				measurementData.Count, err = strconv.Atoi(subPart[equals+1:])
-				if err != nil {
-					log.Error().Err(err).Msg("Failed to parse count")
+			key := subPart[:equals]
+			value := subPart[equals+1:]
+			valueProcessed := false
+			for _, integerKey := range integerKeys {
+				if key == integerKey {
+					intValue, err := strconv.Atoi(value)
+					if err != nil {
+						log.Error().Err(err).Str("key", key).Str("value", value).Msg("Failed to convert to int")
+						break
+					}
+					measurementData[key] = intValue
+					valueProcessed = true
 				}
-			case "device":
-				measurementData.Device = subPart[equals+1:]
-			case "rssi":
-				measurementData.Rssi, err = strconv.Atoi(subPart[equals+1:])
-				if err != nil {
-					log.Error().Err(err).Msg("Failed to parse rssi")
+			}
+			if !valueProcessed {
+				for _, floatKey := range floatKeys {
+					if key == floatKey {
+						floatValue, err := strconv.ParseFloat(value, 64)
+						if err != nil {
+							log.Error().Err(err).Str("key", key).Str("value", value).Msg("Failed to convert to float")
+						}
+						measurementData[key] = floatValue
+						valueProcessed = true
+					}
 				}
-			case "temperature":
-				measurementData.Temperature, err = strconv.ParseFloat(subPart[equals+1:], 64)
-				if err != nil {
-					log.Error().Err(err).Msg("Failed to parse rssi")
-				}
+			}
+			if !valueProcessed {
+				measurementData[key] = value
 			}
 		}
 	}
 	log.Info().Interface("measurementData", measurementData).Msg("Parsed")
+	return measurementData
+}
+
+func storeData(data map[string]any) *ParseResponse {
+	temperatureValue, temperatureExists := data[TEMPERATURE_FIELD].(float64)
+	locationValue, locationExists := data[LOCATION_FIELD].(string)
+	var fields []string
+	if !temperatureExists {
+		fields = append(fields, TEMPERATURE_FIELD)
+	}
+	if !locationExists {
+		fields = append(fields, LOCATION_FIELD)
+	}
+	if len(fields) > 0 {
+		statusText := fmt.Sprintf("Missing required fields: %s", strings.Join(fields, ", "))
+		return &ParseResponse{http.StatusBadRequest, statusText}
+	}
+	log.Info().Str(LOCATION_FIELD, locationValue).Float64(TEMPERATURE_FIELD, temperatureValue).Msg("Storing data")
 	return &ParseResponse{http.StatusOK, "OK"}
 }

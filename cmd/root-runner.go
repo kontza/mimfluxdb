@@ -17,6 +17,6 @@ func rootRunner(cmd *cobra.Command, args []string) {
 		zerochi.Logger(&log.Logger),
 		middleware.Recoverer)
 	r.Post("/api/v2/write", writeHandler)
-	log.Info().Msg("Starting server...")
+	log.Info().Msg("Server started on :8086")
 	http.ListenAndServe(":8086", r)
 }

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/rs/zerolog"
@@ -35,6 +36,9 @@ var rootCmd = &cobra.Command{
 
 func Bootstrap(name string, version string) {
 	rootCmd.Version = version
+	if strings.TrimSpace(name) == "" {
+		name = "mimfluxdb"
+	}
 	rootCmd.Use = name
 }
 
