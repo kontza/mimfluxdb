@@ -1,1 +1,9 @@
 tokens = ["some token that must be in the incoming requests 'Authorization' header, after 'Token'"]
+
+[database_connection]
+username = "postgres"
+password = "some-very-secret-password-here"
+host = "localhost"
+database = "temperatures"
+port = 5432
+

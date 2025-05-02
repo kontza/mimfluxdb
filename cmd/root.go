@@ -19,11 +19,20 @@ import (
 
 var cfgFile string
 
+type DatabaseConnection struct {
+	Username string
+	Password string
+	Host     string
+	Port     int
+	Database string
+}
+
 type AppConfig struct {
 	cfgFile             string
 	Tokens              []string
-	LogWithoutTimestamp bool `mapstructure:"log-without-timestamp"`
-	StructuredLogging   bool `mapstructure:"structured-logging"`
+	LogWithoutTimestamp bool               `mapstructure:"log_without_timestamp"`
+	StructuredLogging   bool               `mapstructure:"structured_logging"`
+	DatabaseConnection  DatabaseConnection `mapstructure:"database_connection"`
 }
 
 var appConfig AppConfig
