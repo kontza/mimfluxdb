@@ -4,6 +4,6 @@ tokens = ["some token that must be in the incoming requests 'Authorization' head
 username = "postgres"
 password = "some-very-secret-password-here"
 host = "localhost"
-database = "temperatures"
+database = "atmospi"
 port = 5432
 
