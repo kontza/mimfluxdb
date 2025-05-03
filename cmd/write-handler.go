@@ -109,7 +109,7 @@ func parseBody(body []byte) map[string]any {
 
 func storeData(data map[string]any) *ParseResponse {
 	log.Info().Interface("map", data).Msg("Storing")
-	timestampValue, timestampExists := data[TIMESTAMP_FIELD].(int)
+	timestampValue, timestampExists := data[TIMESTAMP_FIELD].(int64)
 	temperatureValue, temperatureExists := data[TEMPERATURE_FIELD].(float64)
 	locationValue, locationExists := data[LOCATION_FIELD].(string)
 	countValue, countExists := data[COUNT_FIELD].(int)
@@ -119,17 +119,17 @@ func storeData(data map[string]any) *ParseResponse {
 	if !timestampExists {
 		fields = append(fields, TIMESTAMP_FIELD)
 	} else {
-		log.Info().Int(TIMESTAMP_FIELD, timestampValue).Msg(toTitleCase(TIMESTAMP_FIELD))
+		log.Info().Int64(TIMESTAMP_FIELD, timestampValue).Msg("Using")
 	}
 	if !deviceExists {
 		fields = append(fields, DEVICE_FIELD)
 	} else {
-		log.Info().Str(DEVICE_FIELD, deviceValue).Msg(toTitleCase(DEVICE_FIELD))
+		log.Info().Str(DEVICE_FIELD, deviceValue).Msg("Using")
 	}
 	if !temperatureExists {
 		fields = append(fields, TEMPERATURE_FIELD)
 	} else {
-		log.Info().Float64(TEMPERATURE_FIELD, temperatureValue).Msg(toTitleCase(TEMPERATURE_FIELD))
+		log.Info().Float64(TEMPERATURE_FIELD, temperatureValue).Msg("Using")
 	}
 	if len(fields) > 0 {
 		statusText := fmt.Sprintf("Missing required fields: %s", strings.Join(fields, ", "))
@@ -137,13 +137,13 @@ func storeData(data map[string]any) *ParseResponse {
 		return &ParseResponse{http.StatusBadRequest, statusText}
 	}
 	if locationExists {
-		log.Info().Str(LOCATION_FIELD, locationValue).Msg(toTitleCase(LOCATION_FIELD))
+		log.Info().Str(LOCATION_FIELD, locationValue).Msg("Using")
 	}
 	if countExists {
-		log.Info().Int(COUNT_FIELD, countValue).Msg(toTitleCase(COUNT_FIELD))
+		log.Info().Int(COUNT_FIELD, countValue).Msg("Using")
 	}
 	if rssiExists {
-		log.Info().Int(RSSI_FIELD, rssiValue).Msg(toTitleCase(RSSI_FIELD))
+		log.Info().Int(RSSI_FIELD, rssiValue).Msg("Using")
 	}
 	return &ParseResponse{http.StatusOK, "OK"}
 }
