@@ -58,11 +58,16 @@ tidy:
 	go mod tidy -v
 	go fmt ./...
 
+## generate: generate code
+.PHONY: generate
+generate:
+	# Include additional code generation steps here...
+	gentool -c ./gen-tool.config
+
 ## build: build the application
 .PHONY: build
-build:
+build: generate
 	# Include additional build steps, like TypeScript, SCSS or Tailwind compilation here...
-	gentool -c ./gen-tool.config
 	go build -ldflags '-w -s -X main.appVersion=${app_version} -X main.appName=${binary_name}' -o=/tmp/bin/${binary_name} ${main_package_path}
 
 ## run: run the  application

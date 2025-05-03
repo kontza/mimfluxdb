@@ -33,7 +33,6 @@ databaseChangeLog:
                               type: BIGINT
                               autoIncrement: true
                               constraints:
-                                  primaryKey: true
                                   nullable: false
                         - column:
                               name: device_id
@@ -56,6 +55,12 @@ databaseChangeLog:
                               constraintName: fk_counts_device
                               referencedTableName: devices
                               referencedColumnNames: id
+              - addPrimaryKey:
+                    ifNotExists: true
+                    tableName: count
+                    columnNames: id, recorded_at
+                    constraintName: pk_count
+                    remarks: Composite PK for count table
               - createTable:
                     ifNotExists: true
                     tableName: rssi
@@ -65,7 +70,6 @@ databaseChangeLog:
                               type: BIGINT
                               autoIncrement: true
                               constraints:
-                                  primaryKey: true
                                   nullable: false
                         - column:
                               name: device_id
@@ -88,6 +92,12 @@ databaseChangeLog:
                               constraintName: fk_rssis_device
                               referencedTableName: devices
                               referencedColumnNames: id
+              - addPrimaryKey:
+                    ifNotExists: true
+                    tableName: rssi
+                    columnNames: id, recorded_at
+                    constraintName: pk_rssi
+                    remarks: Composite PK for rssi table
               - createTable:
                     ifNotExists: true
                     tableName: temperature
@@ -97,7 +107,6 @@ databaseChangeLog:
                               type: BIGINT
                               autoIncrement: true
                               constraints:
-                                  primaryKey: true
                                   nullable: false
                         - column:
                               name: device_id
@@ -120,3 +129,9 @@ databaseChangeLog:
                               constraintName: fk_temperatures_device
                               referencedTableName: devices
                               referencedColumnNames: id
+              - addPrimaryKey:
+                    ifNotExists: true
+                    tableName: temperature
+                    columnNames: id, recorded_at
+                    constraintName: pk_temperature
+                    remarks: Composite PK for temperature table
