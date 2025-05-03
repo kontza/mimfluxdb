@@ -32,7 +32,7 @@ Looks like an InfluxDB instance, but writes to a PostgreSQL instance.
         "rssi=-42" \
         "count=16384" \
         "device=28ff248274160427" \
-        17448066320000000000 |\
+        1746253391000000000 |\
         http POST localhost:8086/api/v2/write \
         'Authorization: Token some-very-secret-token-here'
     ```
