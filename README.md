@@ -66,7 +66,7 @@ JOIN latest l
 1. Run migrations:
 
     ```sh
-    liquibase update
+    make migrate
 
     ```
 
@@ -79,5 +79,5 @@ JOIN latest l
 1. Run it:
 
     ```sh
-    gentool -c ./gen-tool.config
+    make generate
     ```

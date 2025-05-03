@@ -60,9 +60,14 @@ tidy:
 
 ## generate: generate code
 .PHONY: generate
-generate:
+generate: migrate
 	# Include additional code generation steps here...
 	gentool -c ./gen-tool.config
+
+## migrate: run liquibase migrations
+.PHONY: migrate
+migrate:
+	liquibase update
 
 ## build: build the application
 .PHONY: build
