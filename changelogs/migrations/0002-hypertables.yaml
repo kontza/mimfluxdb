@@ -1,0 +1,122 @@
+databaseChangeLog:
+    - changeSet:
+          id: 20250502-1
+          author: JR
+          changes:
+              - createTable:
+                    ifNotExists: true
+                    tableName: device
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: deviceid
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: label
+                              type: VARCHAR(255)
+                              constraints:
+                                  nullable: true
+              - createTable:
+                    ifNotExists: true
+                    tableName: count
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: device_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: recorded_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: value
+                              type: INTEGER
+                              constraints:
+                                  nullable: false
+                        - addForeignKeyConstraint:
+                              baseTableName: count
+                              baseColumnNames: device_id
+                              constraintName: fk_counts_device
+                              referencedTableName: devices
+                              referencedColumnNames: id
+              - createTable:
+                    ifNotExists: true
+                    tableName: rssi
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: device_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: recorded_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: value
+                              type: INTEGER
+                              constraints:
+                                  nullable: false
+                        - addForeignKeyConstraint:
+                              baseTableName: rssi
+                              baseColumnNames: device_id
+                              constraintName: fk_rssis_device
+                              referencedTableName: devices
+                              referencedColumnNames: id
+              - createTable:
+                    ifNotExists: true
+                    tableName: temperature
+                    columns:
+                        - column:
+                              name: id
+                              type: BIGINT
+                              autoIncrement: true
+                              constraints:
+                                  primaryKey: true
+                                  nullable: false
+                        - column:
+                              name: device_id
+                              type: BIGINT
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: recorded_at
+                              type: TIMESTAMP
+                              constraints:
+                                  nullable: false
+                        - column:
+                              name: value
+                              type: DOUBLE PRECISION
+                              constraints:
+                                  nullable: false
+                        - addForeignKeyConstraint:
+                              baseTableName: temperature
+                              baseColumnNames: device_id
+                              constraintName: fk_temperatures_device
+                              referencedTableName: devices
+                              referencedColumnNames: id

@@ -5,7 +5,7 @@ databaseChangeLog:
           changes:
               - createTable:
                     ifNotExists: true
-                    tableName: devices
+                    tableName: device
                     columns:
                         - column:
                               name: id
@@ -26,7 +26,7 @@ databaseChangeLog:
                                   nullable: true
               - createTable:
                     ifNotExists: true
-                    tableName: counts
+                    tableName: count
                     columns:
                         - column:
                               name: id
@@ -51,14 +51,14 @@ databaseChangeLog:
                               constraints:
                                   nullable: false
                         - addForeignKeyConstraint:
-                              baseTableName: counts
+                              baseTableName: count
                               baseColumnNames: device_id
                               constraintName: fk_counts_device
                               referencedTableName: devices
                               referencedColumnNames: id
               - createTable:
                     ifNotExists: true
-                    tableName: rssis
+                    tableName: rssi
                     columns:
                         - column:
                               name: id
@@ -83,14 +83,14 @@ databaseChangeLog:
                               constraints:
                                   nullable: false
                         - addForeignKeyConstraint:
-                              baseTableName: rssis
+                              baseTableName: rssi
                               baseColumnNames: device_id
                               constraintName: fk_rssis_device
                               referencedTableName: devices
                               referencedColumnNames: id
               - createTable:
                     ifNotExists: true
-                    tableName: temperatures
+                    tableName: temperature
                     columns:
                         - column:
                               name: id
@@ -115,7 +115,7 @@ databaseChangeLog:
                               constraints:
                                   nullable: false
                         - addForeignKeyConstraint:
-                              baseTableName: temperatures
+                              baseTableName: temperature
                               baseColumnNames: device_id
                               constraintName: fk_temperatures_device
                               referencedTableName: devices

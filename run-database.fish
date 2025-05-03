@@ -15,6 +15,7 @@ podman run \
     --name timescaledb \
     --replace \
     --rm \
-    -p 5432:5432 \
+    --publish 5432:5432 \
     --env POSTGRES_PASSWORD="$PGPASS" \
+    --volume ./pg-data/:/home/postgres/pgdata/data:Z \
     timescale/timescaledb-ha:pg17
