@@ -25,14 +25,14 @@ Looks like an InfluxDB instance, but writes to a PostgreSQL instance.
 1. Make a query:
 
     ```sh
-    printf "%s,%s %s %s %s %s %s\n" \
+    printf "%s,%s %s %s %s %s %s000000000\n" \
         atmospi \
         "location=point-of-measurement" \
         "temperature=6.4" \
         "rssi=-42" \
         "count=16384" \
         "device=28ff248274160427" \
-        1746253391000000000 |\
+        (date +%s) |\
         http POST localhost:8086/api/v2/write \
         'Authorization: Token some-very-secret-token-here'
     ```

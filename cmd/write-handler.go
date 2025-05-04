@@ -23,7 +23,6 @@ const LOCATION_FIELD = "location"
 const RSSI_FIELD = "rssi"
 const TEMPERATURE_FIELD = "temperature"
 const TIMESTAMP_FIELD = "__TIMESTAMP"
-const USING_MSG = "Using"
 
 func (pr *ParseResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
@@ -113,41 +112,32 @@ func storeData(ctx context.Context, data map[string]any) *ParseResponse {
 	log.Info().Interface("map", data).Msg("Storing")
 	timestampValue, timestampExists := data[TIMESTAMP_FIELD].(int64)
 	temperatureValue, temperatureExists := data[TEMPERATURE_FIELD].(float64)
-	locationValue, locationExists := data[LOCATION_FIELD].(string)
+	locationValue, _ := data[LOCATION_FIELD].(string)
 	countValue, countExists := data[COUNT_FIELD].(int)
 	rssiValue, rssiExists := data[RSSI_FIELD].(int)
 	deviceValue, deviceExists := data[DEVICE_FIELD].(string)
 	var fields []string
 	if !timestampExists {
 		fields = append(fields, TIMESTAMP_FIELD)
-	} else {
-		log.Info().Int64(TIMESTAMP_FIELD, timestampValue).Msg(USING_MSG)
 	}
 	if !deviceExists {
 		fields = append(fields, DEVICE_FIELD)
-	} else {
-		log.Info().Str(DEVICE_FIELD, deviceValue).Msg(USING_MSG)
 	}
 	if !temperatureExists {
 		fields = append(fields, TEMPERATURE_FIELD)
-	} else {
-		log.Info().Float64(TEMPERATURE_FIELD, temperatureValue).Msg(USING_MSG)
 	}
 	if len(fields) > 0 {
 		statusText := fmt.Sprintf("Missing required fields: %s", strings.Join(fields, ", "))
 		log.Error().Msg(statusText)
 		return &ParseResponse{http.StatusBadRequest, statusText}
 	}
-	if locationExists {
-		log.Info().Str(LOCATION_FIELD, locationValue).Msg(USING_MSG)
-	}
 	device := getDevice(ctx, deviceValue, locationValue)
-	log.Info().Interface("device", device).Msg("Device")
 	if countExists {
-		log.Info().Int(COUNT_FIELD, countValue).Msg(USING_MSG)
+		storeCount(ctx, timestampValue, device, countValue)
 	}
 	if rssiExists {
-		log.Info().Int(RSSI_FIELD, rssiValue).Msg(USING_MSG)
+		storeRssi(ctx, timestampValue, device, rssiValue)
 	}
+	storeTemperature(ctx, timestampValue, device, temperatureValue)
 	return &ParseResponse{http.StatusOK, "OK"}
 }

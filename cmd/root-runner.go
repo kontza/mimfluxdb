@@ -8,9 +8,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+	"gorm.io/gorm"
 )
 
+var db *gorm.DB
+
 func rootRunner(cmd *cobra.Command, args []string) {
+	db = openDb()
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID,
 		middleware.RealIP,
