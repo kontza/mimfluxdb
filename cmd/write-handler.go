@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -22,6 +23,7 @@ const LOCATION_FIELD = "location"
 const RSSI_FIELD = "rssi"
 const TEMPERATURE_FIELD = "temperature"
 const TIMESTAMP_FIELD = "__TIMESTAMP"
+const USING_MSG = "Using"
 
 func (pr *ParseResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
@@ -50,7 +52,7 @@ func writeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Info().Interface("header", r.Header).Str("body", string(body)).Msg("Received")
 	data := parseBody(body)
-	render.Render(w, r, storeData(data))
+	render.Render(w, r, storeData(r.Context(), data))
 }
 
 func parseBody(body []byte) map[string]any {
@@ -107,7 +109,7 @@ func parseBody(body []byte) map[string]any {
 	return measurementData
 }
 
-func storeData(data map[string]any) *ParseResponse {
+func storeData(ctx context.Context, data map[string]any) *ParseResponse {
 	log.Info().Interface("map", data).Msg("Storing")
 	timestampValue, timestampExists := data[TIMESTAMP_FIELD].(int64)
 	temperatureValue, temperatureExists := data[TEMPERATURE_FIELD].(float64)
@@ -119,17 +121,17 @@ func storeData(data map[string]any) *ParseResponse {
 	if !timestampExists {
 		fields = append(fields, TIMESTAMP_FIELD)
 	} else {
-		log.Info().Int64(TIMESTAMP_FIELD, timestampValue).Msg("Using")
+		log.Info().Int64(TIMESTAMP_FIELD, timestampValue).Msg(USING_MSG)
 	}
 	if !deviceExists {
 		fields = append(fields, DEVICE_FIELD)
 	} else {
-		log.Info().Str(DEVICE_FIELD, deviceValue).Msg("Using")
+		log.Info().Str(DEVICE_FIELD, deviceValue).Msg(USING_MSG)
 	}
 	if !temperatureExists {
 		fields = append(fields, TEMPERATURE_FIELD)
 	} else {
-		log.Info().Float64(TEMPERATURE_FIELD, temperatureValue).Msg("Using")
+		log.Info().Float64(TEMPERATURE_FIELD, temperatureValue).Msg(USING_MSG)
 	}
 	if len(fields) > 0 {
 		statusText := fmt.Sprintf("Missing required fields: %s", strings.Join(fields, ", "))
@@ -137,13 +139,15 @@ func storeData(data map[string]any) *ParseResponse {
 		return &ParseResponse{http.StatusBadRequest, statusText}
 	}
 	if locationExists {
-		log.Info().Str(LOCATION_FIELD, locationValue).Msg("Using")
+		log.Info().Str(LOCATION_FIELD, locationValue).Msg(USING_MSG)
 	}
+	device := getDevice(ctx, deviceValue, locationValue)
+	log.Info().Interface("device", device).Msg("Device")
 	if countExists {
-		log.Info().Int(COUNT_FIELD, countValue).Msg("Using")
+		log.Info().Int(COUNT_FIELD, countValue).Msg(USING_MSG)
 	}
 	if rssiExists {
-		log.Info().Int(RSSI_FIELD, rssiValue).Msg("Using")
+		log.Info().Int(RSSI_FIELD, rssiValue).Msg(USING_MSG)
 	}
 	return &ParseResponse{http.StatusOK, "OK"}
 }
