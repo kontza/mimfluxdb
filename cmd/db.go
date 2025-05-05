@@ -45,14 +45,8 @@ func getDevice(ctx context.Context, deviceValue string, locationValue string) *m
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			device = &model.Device{Deviceid: deviceValue, Label: locationValue}
 			query.Device.WithContext(ctx).Create(device)
-			if created, err := query.Device.WithContext(ctx).
-				Where(query.Device.Deviceid.Eq(deviceValue)).
-				First(); err != nil {
-				log.Error().Err(err).Msg("Failed to get the new device due to")
-			} else {
-				log.Info().Interface("device", created).Msg("Stored")
-				return created
-			}
+			log.Info().Interface("device", device).Msg("Stored")
+			return device
 		} else {
 			log.Panic().Err(err).Msg("Failed to get device due to")
 		}
@@ -69,14 +63,7 @@ func storeCount(ctx context.Context, timestampValue int64, device *model.Device,
 	}
 	query := query.Use(db)
 	query.Count.WithContext(ctx).Create(count)
-	if storedCount, err := query.Count.WithContext(ctx).
-		Where(query.Count.DeviceID.Eq(device.ID)).
-		Where(query.Count.RecordedAt.Eq(time.Unix(0, timestampValue))).
-		First(); err != nil {
-		log.Error().Err(err).Msg("Failed to get the new count due to")
-	} else {
-		log.Info().Interface("count", storedCount).Msg("Stored")
-	}
+	log.Info().Interface("count", count).Msg("Stored")
 }
 
 func storeRssi(ctx context.Context, timestampValue int64, device *model.Device, rssiValue int) {
@@ -86,14 +73,7 @@ func storeRssi(ctx context.Context, timestampValue int64, device *model.Device, 
 		DeviceID:   device.ID}
 	query := query.Use(db)
 	query.Rssi.WithContext(ctx).Create(rssi)
-	if storedRssi, err := query.Rssi.WithContext(ctx).
-		Where(query.Rssi.DeviceID.Eq(device.ID)).
-		Where(query.Rssi.RecordedAt.Eq(time.Unix(0, timestampValue))).
-		First(); err != nil {
-		log.Error().Err(err).Msg("Failed to get the new rssi due to")
-	} else {
-		log.Info().Interface("rssi", storedRssi).Msg("Stored")
-	}
+	log.Info().Interface("rssi", rssi).Msg("Stored")
 }
 
 func storeTemperature(ctx context.Context, timestampValue int64, device *model.Device, temperatureValue float64) {
@@ -103,12 +83,5 @@ func storeTemperature(ctx context.Context, timestampValue int64, device *model.D
 		DeviceID:   device.ID}
 	query := query.Use(db)
 	query.Temperature.WithContext(ctx).Create(temperature)
-	if storedTemperature, err := query.Temperature.WithContext(ctx).
-		Where(query.Temperature.DeviceID.Eq(device.ID)).
-		Where(query.Temperature.RecordedAt.Eq(time.Unix(0, timestampValue))).
-		First(); err != nil {
-		log.Error().Err(err).Msg("Failed to get the new temperature due to")
-	} else {
-		log.Info().Interface("temperature", storedTemperature).Msg("Stored")
-	}
+	log.Info().Interface("temperature", temperature).Msg("Stored")
 }
