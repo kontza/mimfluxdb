@@ -81,3 +81,4 @@ JOIN latest l
     ```sh
     make generate
     ```
+
