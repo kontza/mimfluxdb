@@ -40,6 +40,9 @@ databaseChangeLog:
                               type: BIGINT
                               constraints:
                                   nullable: false
+                                  foreignKeyName: fk_count_device
+                                  referencedTableName: device
+                                  referencedColumnNames: id
                         - column:
                               name: recorded_at
                               type: TIMESTAMP
@@ -50,12 +53,6 @@ databaseChangeLog:
                               type: INTEGER
                               constraints:
                                   nullable: false
-                        - addForeignKeyConstraint:
-                              baseTableName: count
-                              baseColumnNames: device_id
-                              constraintName: fk_counts_device
-                              referencedTableName: devices
-                              referencedColumnNames: id
               - addPrimaryKey:
                     ifNotExists: true
                     tableName: count
@@ -77,6 +74,9 @@ databaseChangeLog:
                               type: BIGINT
                               constraints:
                                   nullable: false
+                                  foreignKeyName: fk_rssi_device
+                                  referencedTableName: device
+                                  referencedColumnNames: id
                         - column:
                               name: recorded_at
                               type: TIMESTAMP
@@ -87,12 +87,6 @@ databaseChangeLog:
                               type: INTEGER
                               constraints:
                                   nullable: false
-                        - addForeignKeyConstraint:
-                              baseTableName: rssi
-                              baseColumnNames: device_id
-                              constraintName: fk_rssis_device
-                              referencedTableName: devices
-                              referencedColumnNames: id
               - addPrimaryKey:
                     ifNotExists: true
                     tableName: rssi
@@ -114,6 +108,9 @@ databaseChangeLog:
                               type: BIGINT
                               constraints:
                                   nullable: false
+                                  foreignKeyName: fk_temperature_device
+                                  referencedTableName: device
+                                  referencedColumnNames: id
                         - column:
                               name: recorded_at
                               type: TIMESTAMP
@@ -124,12 +121,6 @@ databaseChangeLog:
                               type: DOUBLE PRECISION
                               constraints:
                                   nullable: false
-                        - addForeignKeyConstraint:
-                              baseTableName: temperature
-                              baseColumnNames: device_id
-                              constraintName: fk_temperatures_device
-                              referencedTableName: devices
-                              referencedColumnNames: id
               - addPrimaryKey:
                     ifNotExists: true
                     tableName: temperature
