@@ -78,7 +78,7 @@ func parseBody(body []byte) map[string]any {
 			valueProcessed := false
 			for _, integerKey := range integerKeys {
 				if key == integerKey {
-					intValue, err := strconv.Atoi(value)
+					intValue, err := strconv.Atoi(strings.TrimSuffix(value, "i"))
 					if err != nil {
 						log.Error().Err(err).Str("key", key).Str("value", value).Msg("Failed to convert to int")
 						break
@@ -100,7 +100,11 @@ func parseBody(body []byte) map[string]any {
 				}
 			}
 			if !valueProcessed {
-				measurementData[key] = value
+				if key == DEVICE_FIELD {
+					measurementData[key] = strings.Trim(value, "\"")
+				} else {
+					measurementData[key] = value
+				}
 			}
 		}
 	}
