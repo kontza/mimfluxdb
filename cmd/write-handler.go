@@ -54,12 +54,37 @@ func writeHandler(w http.ResponseWriter, r *http.Request) {
 	render.Render(w, r, storeData(r.Context(), data))
 }
 
+func getToken(data string, token string) string {
+	token = fmt.Sprintf("%s=", token)
+	log.Debug().Str("token", token).Str("data", data).Msg("Getting token")
+	startIndex := strings.Index(data, token)
+	log.Debug().Str("start", data[startIndex:]).Msg("Start")
+	if startIndex == -1 {
+		log.Error().Str("token", token).Msg("Did not find token")
+		return ""
+	}
+	nextIndex := strings.Index(data[startIndex:], "=")
+	if nextIndex == -1 {
+		return strings.Trim(data[startIndex:], " \"")
+	} else {
+		remainingData := data[startIndex+len(token):]
+		log.Debug().Str("remaining data", remainingData).Msg("Search next token from")
+		nextEquals := strings.Index(remainingData, "=")
+		log.Debug().Int("nextEquals", nextEquals).Msg("Found")
+		log.Debug().Str("slice", remainingData[:nextEquals]).Msg("Next")
+		lastSpace := strings.LastIndex(remainingData[:nextEquals], " ")
+		lastComma := strings.LastIndex(remainingData[:nextEquals], ",")
+		cutPoint := max(lastSpace, lastComma)
+		log.Debug().Int("cutPoint", cutPoint).Int("lastSpace", lastSpace).Int("lastComma", lastComma).Msg("Cut point")
+		return strings.Trim(remainingData[:cutPoint], " \"")
+	}
+}
+
 func parseBody(body []byte) map[string]any {
 	payload := string(body)
 	firstComma := strings.Index(payload, ",")
 	lastSpace := strings.LastIndex(payload, " ")
 	data := payload[firstComma+1 : lastSpace]
-	bySpaces := strings.Split(data, " ")
 	measurementData := make(map[string]any)
 	timestampString := strings.TrimSpace(payload[lastSpace+1:])
 	if timestampValue, err := strconv.ParseInt(timestampString, 10, 64); err != nil {
@@ -69,7 +94,7 @@ func parseBody(body []byte) map[string]any {
 	}
 	integerKeys := []string{RSSI_FIELD, COUNT_FIELD}
 	floatKeys := []string{TEMPERATURE_FIELD}
-	for _, part := range bySpaces {
+	for _, part := range strings.Split(data, " ") {
 		byCommas := strings.Split(part, ",")
 		for _, subPart := range byCommas {
 			equals := strings.Index(subPart, "=")
