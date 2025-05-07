@@ -30,6 +30,7 @@ type DatabaseConnection struct {
 type AppConfig struct {
 	cfgFile             string
 	Tokens              []string
+	LogLevel            string             `mapstructure:"log_level"`
 	LogWithoutTimestamp bool               `mapstructure:"log_without_timestamp"`
 	StructuredLogging   bool               `mapstructure:"structured_logging"`
 	DatabaseConnection  DatabaseConnection `mapstructure:"database_connection"`
@@ -72,6 +73,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&appConfig.cfgFile, "config", "", fmt.Sprintf("config file (default is $XDG_CONFIG_HOME/%s/config.toml)", rootCmd.Use))
 	rootCmd.PersistentFlags().BoolVarP(&appConfig.StructuredLogging, "structured-logging", "s", false, "Use structured logging")
 	rootCmd.PersistentFlags().BoolVarP(&appConfig.LogWithoutTimestamp, "log-without-timestamp", "w", false, "Do not print timestamp (applies to non-structured logging)")
+	rootCmd.PersistentFlags().StringVarP(&appConfig.LogLevel, "log-level", "l", "info", "Logging level to use")
 }
 
 // initConfig reads in config file and ENV variables if set.
