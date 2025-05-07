@@ -58,17 +58,17 @@ func getToken(data string, token string) string {
 	token = fmt.Sprintf("%s=", token)
 	log.Debug().Str("token", token).Str("data", data).Msg("Getting token")
 	startIndex := strings.Index(data, token)
-	log.Debug().Str("start", data[startIndex:]).Msg("Start")
 	if startIndex == -1 {
 		log.Error().Str("token", token).Msg("Did not find token")
 		return ""
 	}
-	nextIndex := strings.Index(data[startIndex:], "=")
+	log.Debug().Str("start", data[startIndex:]).Msg("Start")
+	remainingData := data[startIndex+len(token):]
+	nextIndex := strings.Index(remainingData, "=")
+	log.Debug().Str("remaining data", remainingData).Msg("Search next token from")
 	if nextIndex == -1 {
-		return strings.Trim(data[startIndex:], " \"")
+		return strings.Trim(remainingData, " \"")
 	} else {
-		remainingData := data[startIndex+len(token):]
-		log.Debug().Str("remaining data", remainingData).Msg("Search next token from")
 		nextEquals := strings.Index(remainingData, "=")
 		log.Debug().Int("nextEquals", nextEquals).Msg("Found")
 		log.Debug().Str("slice", remainingData[:nextEquals]).Msg("Next")
@@ -80,58 +80,68 @@ func getToken(data string, token string) string {
 	}
 }
 
+func parseInt(value string, key string) (int, error) {
+	if intValue, err := strconv.Atoi(strings.TrimSuffix(value, "i")); err == nil {
+		return intValue, nil
+	}
+	return 0, fmt.Errorf("'%s': Failed to convert '%s' to int", key, value)
+}
+
+func parseTemperature(value string, key string) (float64, error) {
+	if floatValue, err := strconv.ParseFloat(value, 64); err == nil {
+		return floatValue, nil
+	}
+	return 0, fmt.Errorf("'%s': Failed to convert '%s' to float", key, value)
+}
+
 func parseBody(body []byte) map[string]any {
-	payload := string(body)
-	firstComma := strings.Index(payload, ",")
-	lastSpace := strings.LastIndex(payload, " ")
-	data := payload[firstComma+1 : lastSpace]
+	bodyString := string(body)
+	firstComma := strings.Index(bodyString, ",")
+	lastSpace := strings.LastIndex(bodyString, " ")
+	payload := bodyString[firstComma+1 : lastSpace]
 	measurementData := make(map[string]any)
-	timestampString := strings.TrimSpace(payload[lastSpace+1:])
+	timestampString := strings.TrimSpace(bodyString[lastSpace+1:])
 	if timestampValue, err := strconv.ParseInt(timestampString, 10, 64); err != nil {
 		log.Error().Err(err).Str("timestamp", timestampString).Msg("Failed to convert")
 	} else {
 		measurementData[TIMESTAMP_FIELD] = timestampValue
 	}
-	integerKeys := []string{RSSI_FIELD, COUNT_FIELD}
-	floatKeys := []string{TEMPERATURE_FIELD}
-	for _, part := range strings.Split(data, " ") {
-		byCommas := strings.Split(part, ",")
-		for _, subPart := range byCommas {
-			equals := strings.Index(subPart, "=")
-			key := subPart[:equals]
-			value := subPart[equals+1:]
-			valueProcessed := false
-			for _, integerKey := range integerKeys {
-				if key == integerKey {
-					intValue, err := strconv.Atoi(strings.TrimSuffix(value, "i"))
-					if err != nil {
-						log.Error().Err(err).Str("key", key).Str("value", value).Msg("Failed to convert to int")
-						break
-					}
-					measurementData[key] = intValue
-					valueProcessed = true
-				}
-			}
-			if !valueProcessed {
-				for _, floatKey := range floatKeys {
-					if key == floatKey {
-						floatValue, err := strconv.ParseFloat(value, 64)
-						if err != nil {
-							log.Error().Err(err).Str("key", key).Str("value", value).Msg("Failed to convert to float")
-						}
-						measurementData[key] = floatValue
-						valueProcessed = true
-					}
-				}
-			}
-			if !valueProcessed {
-				if key == DEVICE_FIELD {
-					measurementData[key] = strings.Trim(value, "\"")
-				} else {
-					measurementData[key] = value
-				}
-			}
+	field := COUNT_FIELD
+	receivedValue := getToken(payload, field)
+	if strings.TrimSpace(receivedValue) != "" {
+		if parsedInt, err := parseInt(receivedValue, field); err != nil {
+			log.Error().Err(err).Msg("Error:")
+		} else {
+			measurementData[field] = parsedInt
 		}
+	}
+	field = RSSI_FIELD
+	receivedValue = getToken(payload, field)
+	if strings.TrimSpace(receivedValue) != "" {
+		if parsedInt, err := parseInt(receivedValue, field); err != nil {
+			log.Error().Err(err).Msg("Error:")
+		} else {
+			measurementData[field] = parsedInt
+		}
+	}
+	field = TEMPERATURE_FIELD
+	receivedValue = getToken(payload, field)
+	if strings.TrimSpace(receivedValue) != "" {
+		if parsedTemperature, err := parseTemperature(receivedValue, field); err != nil {
+			log.Error().Err(err).Msg("Error:")
+		} else {
+			measurementData[field] = parsedTemperature
+		}
+	}
+	field = DEVICE_FIELD
+	receivedValue = getToken(payload, field)
+	if strings.TrimSpace(receivedValue) != "" {
+		measurementData[field] = receivedValue
+	}
+	field = LOCATION_FIELD
+	receivedValue = getToken(payload, field)
+	if strings.TrimSpace(receivedValue) != "" {
+		measurementData[field] = receivedValue
 	}
 	log.Info().Interface("measurementData", measurementData).Msg("Parsed")
 	return measurementData

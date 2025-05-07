@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/rs/zerolog/log"
@@ -26,14 +27,14 @@ func setup(t *testing.T) {
 	testData = fmt.Appendf(testData, " %s=%s", DEVICE_FIELD, DEVICE_VALUE)
 	testData = fmt.Appendf(testData, ",%s=%di", COUNT_FIELD, COUNT_VALUE)
 	testData = fmt.Appendf(testData, ",%s=%di", RSSI_FIELD, RSSI_VALUE)
-	testData = fmt.Appendf(testData, ",%s=%f", TEMPERATURE_FIELD, TEMPERATURE_VALUE)
+	testData = fmt.Appendf(testData, ",%s=%g", TEMPERATURE_FIELD, TEMPERATURE_VALUE)
 	testData = fmt.Appendf(testData, " %d", TIMESTAMP_VALUE)
 	tokenData = []byte("")
 	tokenData = fmt.Appendf(tokenData, "%s=%s", LOCATION_FIELD, LOCATION_VALUE)
 	tokenData = fmt.Appendf(tokenData, " %s=%c%s%c", DEVICE_FIELD, '"', LOCATION_VALUE, '"')
 	tokenData = fmt.Appendf(tokenData, ",%s=%di", COUNT_FIELD, COUNT_VALUE)
 	tokenData = fmt.Appendf(tokenData, ",%s=%di", RSSI_FIELD, RSSI_VALUE)
-	tokenData = fmt.Appendf(tokenData, ",%s=%f", TEMPERATURE_FIELD, TEMPERATURE_VALUE)
+	tokenData = fmt.Appendf(tokenData, ",%s=%g", TEMPERATURE_FIELD, TEMPERATURE_VALUE)
 	setUpLogs(false)
 	t.Helper()
 }
@@ -47,28 +48,33 @@ func TestGetToken(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "Token value with spaces",
+			name:     "Location with spaces",
 			data:     string(tokenData),
 			token:    LOCATION_FIELD,
 			expected: LOCATION_VALUE,
 		},
 		{
-			name:     "Token value with no spaces",
+			name:     "Count",
 			data:     string(tokenData),
 			token:    COUNT_FIELD,
 			expected: fmt.Sprintf("%di", COUNT_VALUE),
 		},
 		{
-			name:     "Token value from between commas",
+			name:     "RSSI from between commas",
 			data:     string(tokenData),
 			token:    RSSI_FIELD,
 			expected: fmt.Sprintf("%di", RSSI_VALUE),
 		},
 		{
-			name:     "Quoted token value with spaces",
+			name:     "Quoted device with spaces",
 			data:     string(tokenData),
 			token:    DEVICE_FIELD,
 			expected: LOCATION_VALUE,
+		}, {
+			name:     "Temperature",
+			data:     string(tokenData),
+			token:    TEMPERATURE_FIELD,
+			expected: fmt.Sprintf("%f", TEMPERATURE_VALUE),
 		},
 	}
 
@@ -94,21 +100,35 @@ func TestParseBody(t *testing.T) {
 			name: "Valid input",
 			body: testData,
 			expected: map[string]any{
-				DEVICE_FIELD:      DEVICE_VALUE,
 				COUNT_FIELD:       COUNT_VALUE,
+				DEVICE_FIELD:      DEVICE_VALUE,
 				LOCATION_FIELD:    LOCATION_VALUE,
 				RSSI_FIELD:        RSSI_VALUE,
 				TEMPERATURE_FIELD: TEMPERATURE_VALUE,
 				TIMESTAMP_FIELD:   TIMESTAMP_VALUE,
 			},
+		}, {
+			name:     "Invalid input",
+			body:     []byte("invalid data"),
+			expected: make(map[string]any),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := parseBody(tt.body)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("parseBody() = %v, want %v", result, tt.expected)
+			if strings.HasPrefix(tt.name, "Invalid") {
+				if !reflect.DeepEqual(result, tt.expected) {
+					t.Errorf("parseBody() = %v, want %v", result, tt.expected)
+				}
+			} else {
+				for key, value := range tt.expected {
+					expected := fmt.Sprintf("%v", value)
+					resultValue := fmt.Sprintf("%v", result[key])
+					if expected != resultValue {
+						t.Errorf("parseBody(): key = %v, value = %v, want = %v", key, result[key], value)
+					}
+				}
 			}
 		})
 	}
