@@ -3,9 +3,9 @@ databaseChangeLog:
       id: 20250503-1
       author: JR
       changes:
-        - sql: SELECT create_hypertable('count', by_range('recorded_at'));
+        - sql: SELECT create_hypertable('count', by_range('recorded_at'), if_not_exists => TRUE);
           stripComments: true
-        - sql: SELECT create_hypertable('rssi', by_range('recorded_at'));
+        - sql: SELECT create_hypertable('rssi', by_range('recorded_at'), if_not_exists => TRUE);
           stripComments: true
-        - sql: SELECT create_hypertable('temperature', by_range('recorded_at'));
+        - sql: SELECT create_hypertable('temperature', by_range('recorded_at'), if_not_exists => TRUE);
           stripComments: true
