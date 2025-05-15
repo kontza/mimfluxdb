@@ -58,6 +58,12 @@ tidy:
 	go mod tidy -v
 	go fmt ./...
 
+## atomic-push: push code changes together with a tag
+.PHONY: atomic-push
+atomic-push:
+	@echo "Pushing changes to remote repository..."
+	git ps --atomic origin main (git describe --tags --abbrev=0)
+
 ## generate: generate code
 .PHONY: generate
 generate: migrate
