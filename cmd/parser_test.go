@@ -74,7 +74,7 @@ func TestGetToken(t *testing.T) {
 			name:     "Temperature",
 			data:     string(tokenData),
 			token:    TEMPERATURE_FIELD,
-			expected: fmt.Sprintf("%f", TEMPERATURE_VALUE),
+			expected: fmt.Sprintf("%g", TEMPERATURE_VALUE),
 		},
 	}
 
