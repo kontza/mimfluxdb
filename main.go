@@ -11,6 +11,5 @@ var (
 )
 
 func main() {
-	cmd.Bootstrap(appName, appVersion)
-	cmd.Execute()
+	cmd.Execute(appName, appVersion)
 }

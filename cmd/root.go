@@ -17,8 +17,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 type DatabaseConnection struct {
 	Username string
 	Password string
@@ -36,6 +34,9 @@ type AppConfig struct {
 	DatabaseConnection  DatabaseConnection `mapstructure:"database_connection"`
 }
 
+const DEFAULT_NAME = "mimfluxdb"
+
+var cfgFile string
 var appConfig AppConfig
 
 // rootCmd represents the base command when called without any subcommands
@@ -44,17 +45,19 @@ var rootCmd = &cobra.Command{
 	Run:   rootRunner,
 }
 
-func Bootstrap(name string, version string) {
+func bootstrap(name string, version string) {
 	rootCmd.Version = version
 	if strings.TrimSpace(name) == "" {
-		name = "mimfluxdb"
+		name = DEFAULT_NAME
 	}
 	rootCmd.Use = name
+	rootCmd.PersistentFlags().Lookup("config").Usage = fmt.Sprintf("config file (default is $XDG_CONFIG_HOME/%s/config.toml)", rootCmd.Use)
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
+func Execute(name string, version string) {
+	bootstrap(name, version)
 	err := rootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
@@ -70,7 +73,7 @@ func init() {
 		return nil
 	}
 
-	rootCmd.PersistentFlags().StringVar(&appConfig.cfgFile, "config", "", fmt.Sprintf("config file (default is $XDG_CONFIG_HOME/%s/config.toml)", rootCmd.Use))
+	rootCmd.PersistentFlags().StringVar(&appConfig.cfgFile, "config", "", "")
 	rootCmd.PersistentFlags().BoolVarP(&appConfig.StructuredLogging, "structured-logging", "s", false, "Use structured logging")
 	rootCmd.PersistentFlags().BoolVarP(&appConfig.LogWithoutTimestamp, "log-without-timestamp", "w", false, "Do not print timestamp (applies to non-structured logging)")
 	rootCmd.PersistentFlags().StringVarP(&appConfig.LogLevel, "log-level", "l", "info", "Logging level to use")
