@@ -62,7 +62,7 @@ tidy:
 .PHONY: atomic-push
 atomic-push:
 	@echo "Pushing changes to remote repository..."
-	@CURRENT_TAG := $(git describe --tags --abbrev=0)
+	@CURRENT_TAG := $(shell git describe --tags --abbrev=0)
 	git ps --atomic origin main $(CURRENT_TAG)
 
 ## generate: generate code
