@@ -71,7 +71,7 @@ migrate:
 
 ## build: build the application
 .PHONY: build
-build: generate
+build:
 	# Include additional build steps, like TypeScript, SCSS or Tailwind compilation here...
 	go build -ldflags '-w -s -X main.appVersion=${app_version} -X main.appName=${binary_name}' -o=/tmp/bin/${binary_name} ${main_package_path}
 
