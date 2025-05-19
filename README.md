@@ -46,18 +46,20 @@ from each sensor:
 
 ```sql
 WITH latest AS (
-  SELECT deviceid,
+  SELECT device_id,
          MAX(recorded_at) AS latest_recorded_at
   FROM temperature
-  GROUP BY deviceid
+  GROUP BY device_id
 )
-SELECT t.deviceid,
+SELECT d.label,
        t.recorded_at,
        t.value
 FROM temperature t
 JOIN latest l
-  ON t.deviceid = l.deviceid
- AND t.recorded_at = l.latest_recorded_at;
+  ON t.device_id = l.device_id
+ AND t.recorded_at = l.latest_recorded_at
+JOIN device d
+  ON t.device_id = d.id;
 ```
 
 ## GORM
@@ -81,4 +83,3 @@ JOIN latest l
     ```sh
     make generate
     ```
-
