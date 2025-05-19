@@ -1,0 +1,10 @@
+[Unit]
+Description=Fake an Influxdb instance
+
+[Install]
+WantedBy=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/mimfluxdb --config /home/someuser/.config/mimfluxdb/config.toml
+KillSignal=SIGQUIT
